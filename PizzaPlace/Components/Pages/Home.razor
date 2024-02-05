@@ -1,7 +1,134 @@
 ﻿@page "/"
+@rendermode InteractiveServer
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Menu</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1 style="text-align:center;">Men&uacute; de Pizzas!</h1>
+<br>
+<br>
+@foreach (var pizza in estado.Menu.Pizzas)
+{
+    <div class="row">
+        <div class="col">
+            <strong>@pizza?.Nombre</strong>
+        </div>
+        <div class="col text-right">
+            @($"{pizza.Precio:RD$ 0.00}")
+        </div>
+        <div class="col"></div>
+        <div class="col">
+            <img src="https://assets.stickpng.com/thumbs/580b57fcd9996e24bc43c1e2.png" alt="@pizza.Picante" style="max-width: 100px; max-height: 100px;" />
+        </div>
 
-Welcome to your new app.
+        <div class="col">
+            <button class="btn btn-outline-success" @onclick="@(()=> AñadirACesta(pizza))">Añadir</button>
+        </div>
+    </div>
+}
+@if (estado.cestaD.Pedidos.Any())
+{
+    <h2 class="">Tu Orden</h2>
+    @foreach (var (pizza, pos) in estado.cestaD.Pedidos.Select((id, pos) => (estado.Menu.ObtenerPizzas(id), pos)))
+    {
+        <div class="row">
+            <div class="col">
+                <strong>@pizza?.Nombre</strong>
+            </div>
+            <div class="col text-right">
+                @($"{pizza.Precio:RD$ 0.00}")
+            </div>
+            <div class="col">
+                <button class="btn btn-outline-danger" @onclick="@(()=> EliminardeCesta(pos))">Eliminar</button>
+            </div>
+        </div>
+    }
+    <div class="row">
+        <div class="col"></div>
+        <div class="col"><hr /></div>
+        <div class="col"> </div>
+        <div class="col"> </div>
+    </div>
+    <div class="row">
+        <div class="col">Total</div>
+        <div class="col tex-right font-weight-bold"> RD$ @($"{estado.PrecioTotal:0.00}")</div>
+        <div class="col"></div>
+        <div class="col"></div>
+        <div class="col"></div>
+    </div>
+    <br />
+}
+
+<h3>Ingrese sus datos personales</h3>
+<EditForm Model="@estado.cestaD.clientes" OnValidSubmit="RealizarPedido">
+    <DataAnnotationsValidator />
+    <fieldset>
+        <div class="row mb-2">
+            <label class="col-2" for="nombre">Nombre:</label>
+            <InputText class="form-control col-6" @bind-Value="@estado.cestaD.clientes.Nombre" />
+            <ValidationMessage For="@(() => estado.cestaD.clientes.Nombre)" />
+        </div>
+        <div class="row mb-2">
+            <label class="col-2" for="calle">Calle:</label>
+            <InputText class="form-control col-6" @bind-Value="@estado.cestaD.clientes.Calle" />
+            <ValidationMessage For="@(() => estado.cestaD.clientes.Calle)" />
+        </div>
+        <div class="row mb-2">
+            <label class="col-2" for="ciudad">Ciudad:</label>
+            <InputSelect class="form-select" @bind-Value="@estado.cestaD.clientes.Ciudad" >
+                <option value="">Elija una ciudad</option>
+                @foreach (var ciudad in NombreCiudades)
+                {
+                       <option value="@ciudad">@ciudad</option>
+                 }
+               </InputSelect>
+                
+
+            <ValidationMessage For="@(() => estado.cestaD.clientes.Ciudad)" />
+        </div>
+        <div class="row mb-2">
+            <button class="btn btn-outline-success" @onclick="@RealizarPedido">Realizar Pedido</button>
+        </div>
+    </fieldset>
+</EditForm>
+
+@code {
+    private Estados estado = new Estados();
+
+    protected override void OnInitialized()
+    {
+        estado.Menu.Add(new Pizzas(1, "Peperroni", "Pizza Picante", 450M, Picantes.Picante));
+        estado.Menu.Add(new Pizzas(2, "Margarita", "Pizza No Picante", 600M, Picantes.Nada));
+        estado.Menu.Add(new Pizzas(3, "Diablosa", "Pizza Muy Picante", 550M, Picantes.Muy_Picante));
+    }
+    private void AñadirACesta(Pizzas pizza) => estado.cestaD.Add(pizza.Id);
+    private void EliminardeCesta(int pos) => estado.cestaD.EliminarEn(pos);
+
+    private void RealizarPedido()
+    {
+        Console.WriteLine("Pedido Realizado");
+    }
+
+    private List<string> NombreCiudades = new List<string>
+    {
+        "Santo Domingo",
+        "Santiago de los Caballeros",
+        "San Francisco de Macorís",
+        "Samaná",
+        "Higüey",
+        "La Romana",
+        "Puerto Plata",
+        "Jarabacoa",
+        "Constanza",
+        "Bonao",
+        "Cotuí",
+        "Sosua",
+        "Cabarete",
+        "Boca Chica",
+        "Barahona",
+        "Baní",
+        "Las Galeras",
+        "Las Terrenas",
+        "Juan Dolio",
+        "Miches"
+    };
+}
